@@ -1,0 +1,45 @@
+1. Scale. Привязать scale параметр из UI к масштабированию модели
+
+2. Albedo. Затекстурировать модель: текстура albedoTexture, cэмплер albedoSampler.
+    - Функция Sample(): https://docs.microsoft.com/en-us/windows/win32/direct3dhlsl/dx-graphics-hlsl-to-sample
+    - После чтения применить функцию srgbInv(). Перед возвратом значения из шейдера применить функцию srgb() из utils.h
+
+3. Specular. Реализовать материал идельного зеркала: считыванием из кубической текстуры environmentTexture по reflection-направлению
+    - Находим View-vector: normalize(camera.position - world position)
+    - Находим reflection-vector: отражаем View vector по нормали с помощью функции reflect: 
+	https://docs.microsoft.com/en-us/windows/win32/direct3dhlsl/dx-graphics-hlsl-reflect
+    - Cчитываем значение из кубмапы по reflection-вектору. нужно еще mul(SwapZYMat, R)
+    - модулировать его на albedo из п.1
+
+4. Normal maps. Брать значение из нормал мапы вместо геометрической нормали модели
+    - функция getWorldNormalFromTexture в utils.h возвращает world-space нормаль
+
+5. Diffuse-освещение. Реализовать diffuse-материал, освещаемый кубмапой
+    - Читаем из последнего мип-уровня SampleLevel() кубмапы по направлению нормали примерно так:  
+	environmentTexture.SampleLevel(environmentSampler, mul(SwapZYMat, N_normalmap), NumberOfLevels-1)
+    - Дока SampleLevel(): https://docs.microsoft.com/en-us/windows/win32/direct3dhlsl/dx-graphics-hlsl-to-samplelevel
+    - Количество мип-уровней можно узнать следующим кодом:
+	uint MipLevel = 0;
+	uint Width, Height, NumberOfLevels;
+	environmentTexture.GetDimensions(MipLevel, Width, Height, NumberOfLevels);
+    - модулировать его на albedo из п.1
+
+6. Plasic. Материал глянцевого пластика. Cмешиваем diffuse и specular по Френелю:
+    Color = Diffuse * (1 - F) + Specular * F, где
+	Diffuse - из п.5
+	Specular - из п.4
+	F - коэффициент френеля. функция из utils.h fresnelSchlick(float cosTheta, float3 F0) 
+	    - cosTheta - max(dot(Normal, View), 0), F0=float3(.04, .04, .04);
+
+7. Metallic. Материал гладкого металла. Только specular:
+    Color = Specular * F, где
+        Specular из п.4
+        F - коэффициент френеля. функция из utils.h fresnelSchlick(float cosTheta, float3 F0) 
+	    - cosTheta - max(dot(Normal, View), 0), F0=albedo из п.1
+
+
+*8. Metallic + Plastic. Совмещение материал пластика и металла по выбору из R-канала metallic-текстуры (metalicTexture)
+     - можно дополнительно мдулировать на слайдер metallic
+
+
+
