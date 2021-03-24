@@ -40,7 +40,7 @@ VertexOut VSMain(VertexIn vertex)
     VertexOut output;
 
     output.objectPosition = vertex.position.xyz;
-    output.worldPositon = mul(float4(vertex.position.xyz * scale.x, 1), modelMatrix).xyz;
+    output.worldPositon = mul(float4(vertex.position.xyz, 1), modelMatrix).xyz;
     output.position = mul(float4(output.worldPositon, 1), viewMatrix);
     output.position = mul(output.position, projectionMatrix);
     output.uv = vertex.uv;
