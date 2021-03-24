@@ -29,7 +29,7 @@ void RenderUI(Data& data)
         static float f = 0.0f;
 
         ImGui::Begin("Settings");
-        ImGui::SliderFloat("mMetallic", &data.mesh->cbuffer.Get().vars.x, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
+        ImGui::SliderFloat("Metallic", &data.mesh->cbuffer.Get().vars.x, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
         ImGui::SliderFloat("Variable 2", &data.mesh->cbuffer.Get().vars.y, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
         ImGui::SliderFloat("Variable 3", &data.mesh->cbuffer.Get().vars.z, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
         ImGui::SliderFloat("Variable 4", &data.mesh->cbuffer.Get().vars.w, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
