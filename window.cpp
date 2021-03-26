@@ -3,6 +3,7 @@
 #include "imgui.h"
 #include "imgui_impl_win32.h"
 
+extern Data* data;
 void CompileShaders();
 
 HWND Window::handle = nullptr;
@@ -37,7 +38,7 @@ DirectX::XMUINT2 Window::GetSize()
     RECT clientRect = {};
     GetClientRect(handle, &clientRect);
 
-    return DirectX::XMUINT2(clientRect.right - clientRect.left, clientRect.bottom - clientRect.top);
+    return DirectX::XMUINT2(max(clientRect.right - clientRect.left, 1), max(1, clientRect.bottom - clientRect.top));
 }
 
 void Window::SetSize(int width, int height)
@@ -84,6 +85,14 @@ LRESULT CALLBACK Window::ProceedMessage(HWND window, UINT message, WPARAM wParam
 
     if (message == WM_KEYUP && wParam==116) // F5
         CompileShaders();
+
+    if (message == WM_SIZE)
+    {
+        Graphics::ResizeBackBuffer();
+
+        if (data && data->camera)
+            data->camera->ResizeBackBuffer();
+    }
 
     return DefWindowProcW(window, message, wParam, lParam);
 }

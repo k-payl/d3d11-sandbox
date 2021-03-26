@@ -11,6 +11,7 @@ public:
     Camera();
     void Start() const;
     void Stop() const;
+    void ResizeBackBuffer();
 
 private:
     struct ShaderVariable

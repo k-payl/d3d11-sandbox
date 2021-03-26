@@ -10,6 +10,7 @@ public:
     static IDXGISwapChain& GetSwapChain();
     static IWICImagingFactory& GetImageFactory();
     static void Update();
+    static void ResizeBackBuffer();
 
 private:
     static Microsoft::WRL::ComPtr<ID3D11Device> device;

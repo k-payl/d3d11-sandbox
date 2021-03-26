@@ -4,6 +4,46 @@ Camera::Camera()
 {
     InitializeLibrary();
 
+
+    ResizeBackBuffer();
+}
+
+void Camera::Start() const
+{
+    DirectX::XMMATRIX viewMatrix = DirectX::XMMatrixTranspose(
+        DirectX::XMMatrixInverse(
+            nullptr,
+            DirectX::XMMatrixRotationRollPitchYaw(
+                DirectX::XMConvertToRadians(rotation.x),
+                DirectX::XMConvertToRadians(rotation.y),
+                DirectX::XMConvertToRadians(rotation.z)
+            ) *
+            DirectX::XMMatrixTranslation(position.x, position.y, position.z)
+        )
+    );
+
+    cbuffer.Get().cameraWorldPosition = DirectX::XMFLOAT4(position.x, position.y, position.z, 1);
+
+    DirectX::XMStoreFloat4x4(&cbuffer.Get().viewMatrix, viewMatrix);
+
+    cbuffer.Attach(1);
+
+    Graphics::GetContext().OMSetDepthStencilState(depthState.Get(), 0);
+    Graphics::GetContext().ClearDepthStencilView(depthSteniclView.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
+
+    Graphics::GetContext().OMSetRenderTargets(1, renderTargetView.GetAddressOf(), depthSteniclView.Get());
+
+    float clearColor[4] = { color.x, color.y, color.z, color.w };
+    Graphics::GetContext().ClearRenderTargetView(renderTargetView.Get(), clearColor);
+
+}
+
+void Camera::Stop() const
+{
+}
+
+void Camera::ResizeBackBuffer()
+{
     Microsoft::WRL::ComPtr<ID3D11Texture2D> texture = nullptr;
     Graphics::GetSwapChain().GetBuffer(0, __uuidof(ID3D11Texture2D), reinterpret_cast<void**>(texture.GetAddressOf()));
 
@@ -51,38 +91,5 @@ Camera::Camera()
     );
 
     DirectX::XMStoreFloat4x4(&cbuffer.Get().projectionMatrix, projectionMatrix);
-}
 
-void Camera::Start() const
-{
-    DirectX::XMMATRIX viewMatrix = DirectX::XMMatrixTranspose(
-        DirectX::XMMatrixInverse(
-            nullptr,
-            DirectX::XMMatrixRotationRollPitchYaw(
-                DirectX::XMConvertToRadians(rotation.x),
-                DirectX::XMConvertToRadians(rotation.y),
-                DirectX::XMConvertToRadians(rotation.z)
-            ) *
-            DirectX::XMMatrixTranslation(position.x, position.y, position.z)
-        )
-    );
-
-    cbuffer.Get().cameraWorldPosition = DirectX::XMFLOAT4(position.x, position.y, position.z, 1);
-
-    DirectX::XMStoreFloat4x4(&cbuffer.Get().viewMatrix, viewMatrix);
-
-    cbuffer.Attach(1);
-
-    Graphics::GetContext().OMSetDepthStencilState(depthState.Get(), 0);
-    Graphics::GetContext().ClearDepthStencilView(depthSteniclView.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
-
-    Graphics::GetContext().OMSetRenderTargets(1, renderTargetView.GetAddressOf(), depthSteniclView.Get());
-
-    float clearColor[4] = { color.x, color.y, color.z, color.w };
-    Graphics::GetContext().ClearRenderTargetView(renderTargetView.Get(), clearColor);
-
-}
-
-void Camera::Stop() const
-{
 }
